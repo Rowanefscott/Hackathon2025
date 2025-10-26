@@ -3,6 +3,7 @@
 <html>
 <head>
     <title>GUTS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             background-color: #111111;
@@ -11,7 +12,8 @@
             font-size: 18px;
             text-align: center;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,18 +25,32 @@
             margin: 20px auto 20px auto;
             width: 20%;
             min-width: 150px;
+            max-width: 250px;
             height: auto;
+            border-radius: 8px;
         }
 
         h1 {
             margin-top: 10px;
             margin-bottom: 20px;
         }
+        
+        .server-message {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #222;
+            border-radius: 8px;
+            border: 1px solid #444;
+            max-width: 600px;
+            width: 90%;
+        }
 
         .chat-container {
             width: 90%;
             max-width: 600px;
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         #chat {
@@ -51,6 +67,12 @@
         #chat p {
             margin: 0 0 10px 0;
             line-height: 1.4;
+            word-wrap: break-word;
+        }
+        
+        .input-area {
+            display: flex;
+            width: 100%;
         }
 
         #msg {
@@ -59,8 +81,9 @@
             border: 1px solid #555;
             border-radius: 8px;
             padding: 10px;
-            width: calc(100% - 100px);
             font-size: 16px;
+            flex-grow: 1;
+            min-width: 0;
         }
 
         button {
@@ -71,8 +94,8 @@
             padding: 10px 15px;
             font-size: 16px;
             cursor: pointer;
-            width: 80px;
             margin-left: 10px;
+            flex-shrink: 0;
         }
 
         button:hover {
@@ -81,18 +104,19 @@
     </style>
 </head>
 <body>
-    <img src="{% static 'app/guts-logo.jpeg' %}" alt="GUTS Banner" class="hero-img">
-    <h1>GUTS Hackathon Simulator</h1>
-    <div>
-        Message <br />
-        <strong>{{ aboldmessage }}</strong><br />
-    </div>
+    <h1>Your Personal AI Bot</h1>
+    
+    
 
     <div class="chat-container">
-        <h2>Talk to Gutty</h2>
-        <div id="chat"></div>
-        <input id="msg" placeholder="Say something..." onkeyup="checkEnter(event)" />
-        <button onclick="sendMsg()">Send</button>
+
+        <div id="chat">
+            <p><b>Gutty:</b> Hi there! What would you like to teach me?</p>
+        </div>
+        <div class="input-area">
+            <input id="msg" placeholder="Say something..." onkeyup="checkEnter(event)" />
+            <button onclick="sendMsg()">Send</button>
+        </div>
     </div>
 
     <script>
@@ -102,18 +126,39 @@
             if (msg === "") return;
 
             let chatBox = document.getElementById('chat');
+            
             chatBox.innerHTML += `<p><b>You:</b> ${escapeHTML(msg)}</p>`;
             msgBox.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
+            let typingIndicator = document.createElement('p');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.innerHTML = '<b>Gutty:</b> <i>typing...</i>';
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
             try {
                 let res = await fetch(`get-response/?msg=${encodeURIComponent(msg)}`);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
                 let data = await res.json();
                 
+                chatBox.removeChild(typingIndicator);
+
                 chatBox.innerHTML += `<p><b>Gutty:</b> ${escapeHTML(data.response)}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
+            
             } catch (error) {
-                chatBox.innerHTML += `<p><b>Gutty:</b> Sorry, I'm having trouble connecting.</p>`;
+                console.error("Fetch error:", error);
+                
+                if (document.getElementById('typing-indicator')) {
+                    chatBox.removeChild(typingIndicator);
+                }
+
+                chatBox.innerHTML += `<p><b>Gutty:</b> Sorry, I'm having trouble connecting. Please try again later.</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
@@ -125,15 +170,13 @@
         }
         
         function escapeHTML(str) {
-            return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
+            let div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        window.onload = function() {
+            document.getElementById('msg').focus();
         }
     </script>
 </body>

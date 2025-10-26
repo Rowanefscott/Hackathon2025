@@ -23,14 +23,5 @@ def gutty_response(request):
 
     scene = story.get("intro", {})
     reply = scene.get("text", "I'm not sure what to say about that.")
-
-    if "hello" in msg:
-        reply = "Hey coder! Ready to win GUTS 2025?"
-    elif "project" in msg:
-        reply = "We're picking the JPMorgan FinTech Challenge, obviously"
-    elif "bye" in msg:
-        reply = "Good luck! Don't forget your caffeine dose"
-    else:
-        reply = "Hmm… I don't get what your saying, you see! I'm still learning, but let's focus on the hackathon!"
     
     return JsonResponse({"response": reply})
