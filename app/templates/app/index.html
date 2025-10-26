@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GUTS</title>
+    <style>
+        body {
+            background-color: #111111; 
+            color: #E6E6E6; 
+            font-family: Arial, Helvetica, sans-serif; 
+            font-size: 18px; 
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        img.hero-img {
+            display: block;
+            margin: 5px auto 20px auto;
+            width: 20%;   
+            height: auto; 
+        }
+
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        </style>
+    </head>
+        <body>
+            <img src="{% static 'app/guts-logo.jpeg' %}" alt="GUTS Banner" class="hero-img">
+            <h1>GUTS Hackathon Simulator</h1>
+            <div>
+                Message <br />
+                <strong>{{ aboldmessage }}</strong><br />
+            </div>
+
+            <h2>Talk to Gutty</h2>
+                <div id="chat"></div>
+                <input id="msg" placeholder="Say something..." />
+                <button onclick="sendMsg()">Send</button>
+
+                <script>
+                async function sendMsg() {
+                let msg = document.getElementById('msg').value;
+                let res = await fetch(`/chat/?msg=${msg}`);
+                let data = await res.json();
+                document.getElementById('chat').innerHTML += `<p><b>You:</b> ${msg}</p>`;
+                document.getElementById('chat').innerHTML += `<p><b>Gutty:</b> ${data.response}</p>`;
+                document.getElementById('msg').value = "";
+                }
+            </script>
+
+
+        </body>
+<html></html>
