@@ -5,5 +5,5 @@ app_name = "app"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("", views.gutty_response, name="gutty_response"),
+    path("get-response/", views.gutty_response, name="gutty_response"),
 ]
